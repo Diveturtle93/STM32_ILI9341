@@ -22,22 +22,32 @@ Pixel mit der gewünschten Farbe.
 
 ### Pining
 
-Damit das Display auch Software mäßig angesteuert werden kann, müssen noch folgende Definitionen
-in der Software getätigt werden.
+Damit das Display auch Software mäßig angesteuert werden kann, müssen noch folgende
+Definitionen in der Software getätigt werden. Diese Definition muss in der `main.h` gesetzt
+werden. Ohne die Definition kann das Display nicht verwendet werden.
 
 ```
-#define ILI9341_SPI_PORT			hspix
-#define ILI9341_RES_Pin				GPIO_PIN_x
-#define ILI9341_RES_GPIO_Port		GPIOx
-#define ILI9341_CS_Pin				GPIO_PIN_x
-#define ILI9341_CS_GPIO_Port		GPIOx
-#define ILI9341_DC_Pin				GPIO_PIN_x
-#define ILI9341_DC_GPIO_Port		GPIOx
-#define ILI9341_LED_Pin				GPIO_PIN_x
-#define ILI9341_LED_GPIO_Port		GPIOx
+#define DIS_SPI_PORT				hspix
+#define DIS_RESET_Pin				GPIO_PIN_x
+#define DIS_RESET_GPIO_Port			GPIOx
+#define DIS_CS_Pin					GPIO_PIN_x
+#define DIS_CS_GPIO_Port			GPIOx
+#define DIS_DC_Pin					GPIO_PIN_x
+#define DIS_DC_GPIO_Port			GPIOx
+#define DIS_LED_Pin					GPIO_PIN_x
+#define DIS_LED_GPIO_Port			GPIOx
 ```
 
 Wobei x die Angabe des definierten Pins, Ports bzw. SPIs ist.
+
+### SPI
+
+Der SPI Port muss als Full-Duplex Master definiert sein. Dabei muss dann das Hardware-NSS
+Signal abgeschaltet und auf Disable gestellt werden. Ein setzen des Chip-Select Pins erfolgt
+im Programm manuell. Dadurch können dann auch mehrere Befehle oder Daten nacheinander
+gesendet werden, ohne das vorher alle Daten in einen Array zusammengefasst werden müssen.
+Ebenfalls ermöglicht dies die spätere Anbindung der Touch-Funktion des Displays über den
+selben SPI-Port.
 
 ### Rotierung
 
@@ -47,7 +57,9 @@ Damit das Display richtig ausgerichtet ist, kann folgender Definition verwendet 
 #define ILI9341_Orientation			1
 ```
 
-Die Angabe der Zahl definiert die Richtung und kann von 1 bis 4 geändert werden.
+Die Definition sollte in der `main.h` erfolgen. Dabei ist die Angabe der Zahl die Ausrichtung
+des Displays und kann von 1 bis 4 geändert werden. Jenachdem wird die Anzeige auf dem Display
+dann rotiert.
 
 ### LED
 
