@@ -14,11 +14,11 @@ Speicher abgelegt. Diese muss individuell auf die Bedürfnisse eines jeden Proje
 werden.
 
 Weitere Funktionen die für die Ansteuerung des Displays vorhanden sind, sind DrawPixel,
-FillRectangle und FillScreen. Bei der Funktion DrawPixel wird an der Koordinate x y ein Pixel
-in der definierten Farbe ausgegeben. Das Selbe passiert auch bei den Funktionen FillRectangle
-und FillScreen. FillRectangle definiert an der Koordinate x y einen rechteckigen Bereich der
-mit der definierten Farbe gefüllt wird. FillScreen löscht das gesamte Display und setzt alle
-Pixel mit der gewünschten Farbe.
+FillRectangle und FillScreen. Bei der Funktion DrawPixel wird an der Koordinate (x | y) ein
+Pixel in der definierten Farbe ausgegeben. Das Selbe passiert auch bei den Funktionen
+`FillRectangle` und `FillScreen`. `FillRectangle` definiert an der Koordinate (x | y) einen
+rechteckigen Bereich der mit der definierten Farbe gefüllt wird. `FillScreen` löscht das
+gesamte Display und setzt alle Pixel mit der gewünschten Farbe.
 
 ### Pining
 
@@ -109,7 +109,7 @@ Der LED Pin ist zugleich auch für das Einschalten des Displays zuständig. Dabe
 auf dem Display angezeigt wenn der Pin LED gesetzt ist. Wird der Pin LED wieder ausgeschaltet,
 so ist das Display ebenfalls wieder aus.
 
-Hierfür werden die Funtkionen ILI9341_LedON und ILI9341_LedOFF genutzt.
+Hierfür werden die Funktionen ILI9341_LedON und ILI9341_LedOFF genutzt.
 
 ### Initialisierung
 
