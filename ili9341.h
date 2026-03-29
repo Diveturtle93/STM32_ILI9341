@@ -35,17 +35,6 @@
 #include "font.h"
 //----------------------------------------------------------------------
 
-// Memory Access Control Register
-//----------------------------------------------------------------------
-#define ILI9341_MADCTL_MY				0x80
-#define ILI9341_MADCTL_MX				0x40
-#define ILI9341_MADCTL_MV				0x20
-#define ILI9341_MADCTL_ML				0x10
-#define ILI9341_MADCTL_RGB				0x00
-#define ILI9341_MADCTL_BGR				0x08
-#define ILI9341_MADCTL_MH				0x04
-//----------------------------------------------------------------------
-
 // Neudefinieren des SPI wenn notwendig
 //----------------------------------------------------------------------
 #ifnded ILI9341_SPI_PORT
@@ -57,14 +46,41 @@ extern SPI_HandleTypeDef ILI9341_SPI_PORT;
 
 // Pins definieren
 //----------------------------------------------------------------------
-#define ILI9341_RES_Pin					DIS_RESET_Pin
-#define ILI9341_RES_GPIO_Port			DIS_RESET_GPIO_Port
-#define ILI9341_CS_Pin					DIS_CS_Pin
-#define ILI9341_CS_GPIO_Port			DIS_CS_GPIO_Port
-#define ILI9341_DC_Pin					DIS_DC_Pin
-#define ILI9341_DC_GPIO_Port			DIS_DC_GPIO_Port
-#define ILI9341_LED_Pin					DIS_LED_Pin
-#define ILI9341_LED_GPIO_Port			DIS_LED_GPIO_Port
+// Reset Pin
+//----------------------------------------------------------------------
+#ifdef DIS_RESET_GPIO_Port
+	#define ILI9341_RES_Pin					DIS_RESET_Pin
+	#define ILI9341_RES_GPIO_Port			DIS_RESET_GPIO_Port
+#else
+	#warning "Kein Reset Pin für ILI9341 definiert"
+#endif
+//----------------------------------------------------------------------
+// Chip Select Pin
+//----------------------------------------------------------------------
+#ifdef DIS_CS_GPIO_Port
+	#define ILI9341_CS_Pin					DIS_CS_Pin
+	#define ILI9341_CS_GPIO_Port			DIS_CS_GPIO_Port
+#else
+	#warning "Kein Chip Select Pin für ILI9341 definiert"
+#endif
+//----------------------------------------------------------------------
+// DC Pin
+//----------------------------------------------------------------------
+#ifdef DIS_DC_GPIO_Port
+	#define ILI9341_DC_Pin					DIS_DC_Pin
+	#define ILI9341_DC_GPIO_Port			DIS_DC_GPIO_Port
+#else
+	#warning "Kein DC Pin für ILI9341 definiert"
+#endif
+//----------------------------------------------------------------------
+// LED Pin
+//----------------------------------------------------------------------
+#ifdef DIS_LED_GPIO_Port
+	#define ILI9341_LED_Pin					DIS_LED_Pin
+	#define ILI9341_LED_GPIO_Port			DIS_LED_GPIO_Port
+#else
+	#warning "Kein LED Pin für ILI9341 definiert"
+#endif
 //----------------------------------------------------------------------
 
 // Standard Orientierung
@@ -108,6 +124,17 @@ extern SPI_HandleTypeDef ILI9341_SPI_PORT;
 //----------------------------------------------------------------------
 
 #endif
+//----------------------------------------------------------------------
+
+// Memory Access Control Register
+//----------------------------------------------------------------------
+#define ILI9341_MADCTL_MY				0x80
+#define ILI9341_MADCTL_MX				0x40
+#define ILI9341_MADCTL_MV				0x20
+#define ILI9341_MADCTL_ML				0x10
+#define ILI9341_MADCTL_RGB				0x00
+#define ILI9341_MADCTL_BGR				0x08
+#define ILI9341_MADCTL_MH				0x04
 //----------------------------------------------------------------------
 
 // Farben definieren
