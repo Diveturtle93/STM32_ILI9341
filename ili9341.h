@@ -9,6 +9,11 @@
 // Quelle	:	https://github.com/afiskon/stm32-ili9341/blob/master/Lib/ili9341/ili9341.h
 //----------------------------------------------------------------------
 
+// Saveguard symbol
+//----------------------------------------------------------------------
+#pragma once
+//----------------------------------------------------------------------
+
 // Dateiheader definieren
 //----------------------------------------------------------------------
 #ifndef INC_ILI9341_H_
@@ -43,7 +48,10 @@
 
 // Neudefinieren des SPI wenn notwendig
 //----------------------------------------------------------------------
-#define ILI9341_SPI_PORT				DIS_SPI_PORT
+#ifnded ILI9341_SPI_PORT
+	#define ILI9341_SPI_PORT hspi3
+#endif
+
 extern SPI_HandleTypeDef ILI9341_SPI_PORT;
 //----------------------------------------------------------------------
 
@@ -64,7 +72,7 @@ extern SPI_HandleTypeDef ILI9341_SPI_PORT;
 // Ausrichtung Pins unten = Normal
 // Normal 1, Upside down 4, Nach recht liegend 2, Nach links liegend 3
 #ifndef ILI9341_Orientation
-	#define ILI9341_Orientation			1
+	#define ILI9341_Orientation		1
 #endif
 
 // Normal
@@ -98,6 +106,7 @@ extern SPI_HandleTypeDef ILI9341_SPI_PORT;
 #define ILI9341_HEIGHT					320
 #define ILI9341_ROTATION				(ILI9341_MADCTL_MY | ILI9341_MADCTL_BGR)
 //----------------------------------------------------------------------
+
 #endif
 //----------------------------------------------------------------------
 
