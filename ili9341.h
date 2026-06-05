@@ -35,6 +35,14 @@
 #include "font.h"
 //----------------------------------------------------------------------
 
+// Version definieren
+//----------------------------------------------------------------------
+#define ILI9341_MAJOR						0
+#define ILI9341_MINOR						0
+#define ILI9341_PATCH						0
+#define ILI9341_DEV							0
+//----------------------------------------------------------------------
+
 // Neudefinieren des SPI wenn notwendig
 //----------------------------------------------------------------------
 #ifnded ILI9341_SPI_PORT
@@ -52,7 +60,7 @@ extern SPI_HandleTypeDef ILI9341_SPI_PORT;
 	#define ILI9341_RES_Pin					DIS_RESET_Pin
 	#define ILI9341_RES_GPIO_Port			DIS_RESET_GPIO_Port
 #else
-	#warning "Kein Reset Pin für ILI9341 definiert"
+	#warning "Kein Reset Pin fuer ILI9341 definiert"
 #endif
 //----------------------------------------------------------------------
 // Chip Select Pin
@@ -61,7 +69,7 @@ extern SPI_HandleTypeDef ILI9341_SPI_PORT;
 	#define ILI9341_CS_Pin					DIS_CS_Pin
 	#define ILI9341_CS_GPIO_Port			DIS_CS_GPIO_Port
 #else
-	#warning "Kein Chip Select Pin für ILI9341 definiert"
+	#warning "Kein Chip Select Pin fuer ILI9341 definiert"
 #endif
 //----------------------------------------------------------------------
 // DC Pin
@@ -70,16 +78,16 @@ extern SPI_HandleTypeDef ILI9341_SPI_PORT;
 	#define ILI9341_DC_Pin					DIS_DC_Pin
 	#define ILI9341_DC_GPIO_Port			DIS_DC_GPIO_Port
 #else
-	#warning "Kein DC Pin für ILI9341 definiert"
+	#warning "Kein DC Pin fuer ILI9341 definiert"
 #endif
 //----------------------------------------------------------------------
 // LED Pin
 //----------------------------------------------------------------------
-#ifdef DIS_LED_GPIO_Port
-	#define ILI9341_LED_Pin					DIS_LED_Pin
-	#define ILI9341_LED_GPIO_Port			DIS_LED_GPIO_Port
+#ifdef DIS_ON_GPIO_Port
+	#define ILI9341_ON_Pin					DIS_LED_Pin
+	#define ILI9341_ON_GPIO_Port			DIS_LED_GPIO_Port
 #else
-	#warning "Kein LED Pin für ILI9341 definiert"
+	#warning "Kein On/Off Pin fuer ILI9341 definiert"
 #endif
 //----------------------------------------------------------------------
 
@@ -170,8 +178,8 @@ void ILI9341_FillRectangle (uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint
 void ILI9341_FillScreen (uint16_t color);
 void ILI9341_DrawImage (uint16_t x, uint16_t y, uint16_t w, uint16_t h, const uint16_t* data);
 void ILI9341_InvertColors (bool invert);
-void ILI9341_LedON (void);
-void ILI9341_LedOFF (void);
+void ILI9341_DisplayON (void);
+void ILI9341_DisplayOFF (void);
 //----------------------------------------------------------------------
 
 #endif // INC_ILI9341_H_

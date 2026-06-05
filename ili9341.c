@@ -418,18 +418,18 @@ void ILI9341_InvertColors (bool invert)
 }
 //----------------------------------------------------------------------
 
-// Hintergrundbeleichtung einschalten
+// Display einschalten
 //----------------------------------------------------------------------
-void ILI9341_LedON (void)
+void ILI9341_DisplayON (void)
 {
-	HAL_GPIO_WritePin(ILI9341_LED_GPIO_Port, ILI9341_LED_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(ILI9341_ON_GPIO_Port, ILI9341_ON_Pin, GPIO_PIN_SET);
 }
 //----------------------------------------------------------------------
 
-// Hintergrundbeleuchtung ausschalten
+// Display ausschalten
 //----------------------------------------------------------------------
-void ILI9341_LedOFF (void)
+void ILI9341_DisplayOFF (void)
 {
-	HAL_GPIO_WritePin(ILI9341_LED_GPIO_Port, ILI9341_LED_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(ILI9341_ON_GPIO_Port, ILI9341_ON_Pin, GPIO_PIN_RESET);
 }
 //----------------------------------------------------------------------
