@@ -1,119 +1,184 @@
-# Display ILI9341 ansteuern
-
-Diese Bibliothek stellt alle nötigen Funktionen für die Ansteuerung eines ILI9341-Display mit
-einem STM32 zur Verfügung. Dabei wird das Display über SPI angesteuert. Zusätzlich sind noch
-die Leitungen Reset und DC am Display anzuschließen und im Programm zu steuern.
-
-Die Bibliothek stellt Funktionen zur Anzeige von Text, einzelnen Zeichen oder einem Image
-zur Verfügung. Für die Ausgabe von Text wird zusätzlich noch der Zeichensatz mit erstellt.
-Dieser ist in drei größen vorhanden. 7x10 Pixel, 11x18 Pixel und 16x26 Pixel. Eine Anpassung
-für weitere Schriftsätze kann ebenfalls erfolgen.
-
-Aktuell ist eine Funktion für die Anzeige eines Bildes vorhanden. Dafür wird ein Testbild im
-Speicher abgelegt. Diese muss individuell auf die Bedürfnisse eines jeden Projektes angepasst
-werden.
-
-Weitere Funktionen die für die Ansteuerung des Displays vorhanden sind, sind DrawPixel,
-FillRectangle und FillScreen. Bei der Funktion DrawPixel wird an der Koordinate (x | y) ein
-Pixel in der definierten Farbe ausgegeben. Das Selbe passiert auch bei den Funktionen
-`FillRectangle` und `FillScreen`. `FillRectangle` definiert an der Koordinate (x | y) einen
-rechteckigen Bereich der mit der definierten Farbe gefüllt wird. `FillScreen` löscht das
-gesamte Display und setzt alle Pixel mit der gewünschten Farbe.
-
-### Pining
-
-Damit das Display auch softwaremäßig angesteuert werden kann, müssen noch die Pins in der
-Software bestimmt werden. Die Konfiguration der Bibliothek sieht wie folgt aus.
-
+# STM32 ILI9341 Display
+ 
+Eine in C implementierte Treiberbibliothek für den ILI9341-Display-Controller auf
+STM32-Mikrocontrollern. Die Ansteuerung erfolgt über SPI. Die Bibliothek umfasst
+Funktionen zur Anzeige von Text, geometrischen Flächen, Einzelpixeln und Bildern
+sowie einen integrierten Zeichensatz in drei Größen.
+ 
+Die Bibliothek basiert auf dem Projekt von [afiskon/stm32-ili9341](https://github.com/afiskon/stm32-ili9341)
+und wurde weiterentwickelt.
+ 
+## Beschreibung
+ 
+Das ILI9341 ist ein weit verbreiteter TFT-Display-Controller für 2,4"–2,8"-Displays
+mit einer Auflösung von 240×320 Pixeln. Die Bibliothek steuert das Display
+vollständig über SPI an und verwaltet die GPIO-Leitungen für Reset, Chip-Select,
+Data/Command und Hintergrundbeleuchtung direkt im Code. Farben werden im RGB565-Format
+(16 Bit) übergeben.
+ 
+## Dateien
+ 
+| Datei             | Beschreibung                                                             |
+|-------------------|--------------------------------------------------------------------------|
+| `ili9341.h`       | Hauptheader: API, Farbdefinitionen, Orientierung, Pin-Mapping            |
+| `ili9341.c`       | Implementierung aller Display-Funktionen                                 |
+| `font.h`          | `FontDef`-Struktur und Deklaration der drei Schriftgrößen                |
+| `font.c`          | Pixel-Daten der Zeichensätze Font_7x10, Font_11x18, Font_16x26          |
+| `ili9341_img.h`   | Testbild als uint16_t-Array im RGB565-Format (projektspezifisch anpassen)|
+ 
+## Hardware-Anschluss
+ 
+Das Display wird über SPI im Full-Duplex-Master-Modus betrieben. Zusätzlich zum
+SPI-Bus werden vier GPIO-Leitungen benötigt:
+ 
+| Signal  | Beschreibung                                      |
+|---------|---------------------------------------------------|
+| RESET   | Hardware-Reset des Displays                       |
+| CS      | Chip-Select (wird manuell im Code gesteuert)      |
+| DC      | Data/Command-Umschaltung                          |
+| LED     | Hintergrundbeleuchtung / Display ein/aus          |
+ 
+**Hinweis zum SPI:** Das Hardware-NSS-Signal muss in CubeMX auf „Disable" gestellt
+werden, da der CS-Pin manuell gesteuert wird. Dies ermöglicht es, mehrere Befehle
+nacheinander zu senden und später eine Touch-Anbindung über denselben SPI-Port zu
+realisieren.
+ 
+## Konfiguration in `main.h`
+ 
+Folgende Definitionen müssen in der `main.h` des Projekts gesetzt werden, damit die
+Bibliothek korrekt auf die Hardware zugreifen kann:
+ 
+```c
+#define DIS_SPI_PORT        hspix               // z. B. hspi3
+ 
+#define DIS_RESET_Pin       GPIO_PIN_x
+#define DIS_RESET_GPIO_Port GPIOx
+ 
+#define DIS_CS_Pin          GPIO_PIN_x
+#define DIS_CS_GPIO_Port    GPIOx
+ 
+#define DIS_DC_Pin          GPIO_PIN_x
+#define DIS_DC_GPIO_Port    GPIOx
+ 
+#define DIS_ON_Pin          GPIO_PIN_x
+#define DIS_ON_GPIO_Port    GPIOx
 ```
-#define ILI9341_RES_Pin				DIS_RESET_Pin
-#define ILI9341_RES_GPIO_Port		DIS_RESET_GPIO_Port
-#define ILI9341_CS_Pin				DIS_CS_Pin
-#define ILI9341_CS_GPIO_Port		DIS_CS_GPIO_Port
-#define ILI9341_DC_Pin				DIS_DC_Pin
-#define ILI9341_DC_GPIO_Port		DIS_DC_GPIO_Port
-#define ILI9341_LED_Pin				DIS_LED_Pin
-#define ILI9341_LED_GPIO_Port		DIS_LED_GPIO_Port
+ 
+Wobei `x` jeweils der konkrete Pin, Port oder SPI-Handle des Projekts ist.
+ 
+### Displayausrichtung
+ 
+Die Orientierung wird ebenfalls in `main.h` oder direkt in `ili9341.h` definiert:
+ 
+```c
+#define ILI9341_Orientation  1
 ```
-
-Damit werden alle Pins die zusätzlich zum SPI benötigt werden gesetzt. Nun müssen entweder
-die zu nutzenden Pins mit den Platzhaltern `DIS_RESET, DIS_CS, DIS_DC` und `DIS_LED` benannt
-werden. Dies ist am einfachsten in MX-Cube. Oder man setzt die Pins manuell in der `main.h`.
-
-Ebenfalls werden die Pins für den SPI Port ausgewählt. Dann muss noch der SPI-Port an die
-Bibliothek übergeben werden. Dies kann man mit dem nächsten Befehl machen.
-
+ 
+| Wert | Ausrichtung             | Auflösung  |
+|------|-------------------------|------------|
+| `1`  | Normal (Pins unten)     | 240 × 320  |
+| `2`  | Nach rechts gedreht     | 320 × 240  |
+| `3`  | Nach links gedreht      | 320 × 240  |
+| `4`  | Auf den Kopf gestellt   | 240 × 320  |
+ 
+## API
+ 
+```c
+void ILI9341_Init(void);                                                          // Display initialisieren
+void ILI9341_LedON(void);                                                         // Hintergrundbeleuchtung einschalten
+void ILI9341_LedOFF(void);                                                        // Hintergrundbeleuchtung ausschalten
+void ILI9341_FillScreen(uint16_t color);                                          // Gesamten Bildschirm mit Farbe füllen
+void ILI9341_DrawPixel(uint16_t x, uint16_t y, uint16_t color);                  // Einzelnen Pixel setzen
+void ILI9341_FillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h,
+                            uint16_t color);                                       // Rechteck mit Farbe füllen
+void ILI9341_WriteString(uint16_t x, uint16_t y, const char* str,
+                          FontDef font, uint16_t color, uint16_t bgcolor);        // Text ausgeben
+void ILI9341_DrawImage(uint16_t x, uint16_t y, uint16_t w, uint16_t h,
+                        const uint16_t* data);                                    // Bild ausgeben (RGB565-Array)
+void ILI9341_InvertColors(bool invert);                                           // Farben invertieren
+void ILI9341_Unselect(void);                                                      // CS-Pin freigeben
 ```
-#define ILI9341_SPI_PORT hspi3
+ 
+## Zeichensätze
+ 
+Die Bibliothek enthält drei eingebettete Zeichensätze, die direkt an `ILI9341_WriteString` übergeben werden:
+ 
+| Schrift      | Größe (B × H) | Verwendung               |
+|--------------|---------------|--------------------------|
+| `Font_7x10`  | 7 × 10 Pixel  | Kleine Beschriftungen    |
+| `Font_11x18` | 11 × 18 Pixel | Standardtext             |
+| `Font_16x26` | 16 × 26 Pixel | Große, gut lesbare Texte |
+ 
+## Vordefinierte Farben
+ 
+Die Bibliothek stellt fertige RGB565-Farbkonstanten bereit:
+ 
+`ILI9341_BLACK`, `ILI9341_WHITE`, `ILI9341_RED`, `ILI9341_GREEN`, `ILI9341_BLUE`,
+`ILI9341_CYAN`, `ILI9341_MAGENTA`, `ILI9341_YELLOW`, `ILI9341_ORANGE`, `ILI9341_NAVY`,
+`ILI9341_DARKGREEN`, `ILI9341_DARKCYAN`, `ILI9341_MAROON`, `ILI9341_PURPLE`,
+`ILI9341_OLIVE`, `ILI9341_LIGHTGREY`, `ILI9341_DARKGREY`, `ILI9341_GREENYELLOW`
+ 
+Eigene Farben können mit dem Makro berechnet werden:
+ 
+```c
+ILI9341_COLOR565(r, g, b)   // Berechnet RGB565 aus 8-Bit R, G, B
 ```
-
-Standardmäßig ist in der Software SPI3 ausgewählt. Hier kann aber auch jeder andere SPI-Port
-verwendet werden.
-
-### SPI
-
-Zusätzlich zur Auswahl des SPI, muss dieser auch noch richtig eingestellt werden. Der SPI
-fungiert als Full-Duplex Master. Eine Hardware Chip-Select Leitung wird nicht benötigt.
-Diese wird schon bei der Definition der Pins mit dabei und kann ausgeschaltet bleiben.
-
-Auch ein DMA oder Interrupt Handler wird für die Bibliothekt nicht benötigt. Daher können
-diese beiden Einstellungen ebenfalls abgeschaltet bleiben.
-
-Als nächstes folgt die Einstellung der Parameter. Die nachfolgende Tabelle stellt alle
-Parameter für die Einstellung des SPIs für das ILI9341 Display dar.
-
-|  |  |  |
-|:-|:-|:-|
-| Basic Parameter |  |  |
-| | Frame Format | Motorola |
-| | Data Size | 8 Bits |
-| | First Bit | MSB First |
-| Clock Parameter |  |  |
-| | Prescaler | 2 | |
-| | Clock Polarity (CPOL) | Low |
-| | Clock Phase (CPHL) | 1 Edge |
-| Advanced Parameters | | |
-| | CRC Calculation | Disable |
-| | NSS Signal Type | Software |
-
-Für den Prescaler ist noch auf die Frequenz zu achten. Die Bibliothek ist aktuell nicht in
-der Lage die Frequenz automatisch einzustellen. Daher ist der Prescaler an die eigenen
-Einstellungen für den STM32 anzupassen. Hier ist der Prescaler 2 und der SPI für das Display
-läuft mit einer Taktfrequenz von 18 MHz.
-
-### Rotierung
-
-Damit das Display richtig ausgerichtet wird, kann folgender Definition verwendet werden.
-
+ 
+## Verwendung
+ 
+### 1. Dateien einbinden
+ 
+Alle Dateien in das STM32-Projekt kopieren und den Header einbinden:
+ 
+```c
+#include "ili9341.h"
 ```
-#define ILI9341_Orientation			1
+ 
+### 2. Initialisierung
+ 
+Vor der Hauptschleife einmalig aufrufen:
+ 
+```c
+ILI9341_Init();
+ILI9341_DisplayON();
 ```
+ 
+### 3. Anzeige
+ 
+```c
+// Bildschirm schwarz füllen
+ILI9341_FillScreen(ILI9341_BLACK);
+ 
+// Text ausgeben
+ILI9341_WriteString(10, 10, "Hallo Welt!", Font_16x26, ILI9341_WHITE, ILI9341_BLACK);
+ 
+// Rechteck zeichnen
+ILI9341_FillRectangle(20, 60, 100, 50, ILI9341_BLUE);
+ 
+// Einzelnen Pixel setzen
+ILI9341_DrawPixel(120, 160, ILI9341_RED);
+ 
+// Bild anzeigen (aus ili9341_img.h)
+ILI9341_DrawImage(0, 0, 240, 320, (uint16_t*)image_data);
+```
+ 
+### 4. Bilder anzeigen
+ 
+Bilder müssen als `uint16_t`-Array im RGB565-Format in `ili9341_img.h` abgelegt werden.
+Das Array kann z. B. mit einem Bildkonverter (z. B. LCD Image Converter) aus einer
+Grafik erzeugt werden. Breite und Höhe des Bildes müssen beim Aufruf von `ILI9341_DrawImage`
+angegeben werden.
+ 
+## Quellen
+ 
+Diese Bibliothek basiert auf:
+- [afiskon/stm32-ili9341](https://github.com/afiskon/stm32-ili9341)
 
-Die Angabe der Zahl definiert die Richtung und kann von 1 bis 4 geändert werden. Hierbei ist
-die Standardausrichtung mit den Pinnen nach unten.
+## Abhängigkeiten
+ 
+- `main.h` – STM32 HAL (inkl. SPI- und GPIO-Handle)
 
-| Ausrichtung | Orientierung |
-|:----------- |:------------:|
-| Normal | 1 |
-| Nach Rechts gedreht | 2 |
-| Nach Links gedreht | 3 |
-| Upside Down | 4 |
-
-In der Software wird abgefragt, ob die Orientierung ausgewählt wurde. Dies kann mit dem oben
-genannten Define gemacht werden. Wird das Define nicht in der `main.h` gesetzt, so wird die
-Standardausrichtung ausgewählt.
-
-### LED
-
-Der LED Pin ist zugleich auch für das Einschalten des Displays zuständig. Dabei wird nur Text
-auf dem Display angezeigt wenn der Pin LED gesetzt ist. Wird der Pin LED wieder ausgeschaltet,
-so ist das Display ebenfalls wieder aus.
-
-Hierfür werden die Funktionen ILI9341_LedON und ILI9341_LedOFF genutzt.
-
-### Initialisierung
-
-Damit die Bibliothek genutzt werden kann, muss zu Beginn im Programmcode einmal die
-Initialisierung des Displays aufgerufen werden. Dies passiert über die Funktion ILI9341_Init.
-Idealer weise wird diese Funktion in der `main` vor der `while(1)` ausgeführt. Danach können
-dann alle Funktionen aus der Bibliothek verwendet werden.
+## Lizenz
+ 
+Dieses Projekt steht unter der [GPL-3.0 Lizenz](LICENSE).
+ 
