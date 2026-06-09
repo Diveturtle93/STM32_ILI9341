@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-// Titel	:	ILI9341.h
+// Titel	:	ili9341.c
 //----------------------------------------------------------------------
 // Sprache	:	C
 // Datum	:	19.05.2025
@@ -7,6 +7,11 @@
 // Autor	:	Diveturtle93
 // Projekt	:	Display ILI9341
 // Quelle	:	https://github.com/afiskon/stm32-ili9341/blob/master/Lib/ili9341/ili9341.c
+//----------------------------------------------------------------------
+
+// Einfuegen der standard Include-Dateien
+//----------------------------------------------------------------------
+
 //----------------------------------------------------------------------
 
 // Einfuegen der STM Include-Dateien
@@ -60,8 +65,8 @@ static void ILI9341_WriteData (uint8_t* buff, size_t buff_size)
 {
     HAL_GPIO_WritePin(ILI9341_DC_GPIO_Port, ILI9341_DC_Pin, GPIO_PIN_SET);
 
-    // split data in small chunks because HAL can't send more then 64K at once
-    while(buff_size > 0)
+    // Daten aufteilen, HAL kann nicht mehr als 64kB senden
+    while (buff_size > 0)
 	{
         uint16_t chunk_size = buff_size > 32768 ? 32768 : buff_size;
 		
@@ -322,7 +327,7 @@ void ILI9341_WriteString (uint16_t x, uint16_t y, const char* str, FontDef font,
 
             if (*str == ' ')
 			{
-                // skip spaces in the beginning of the new line
+                // Ueberspringe Leerzeichen bei neuer Zeile
                 str++;
                 continue;
             }
@@ -341,7 +346,7 @@ void ILI9341_WriteString (uint16_t x, uint16_t y, const char* str, FontDef font,
 //----------------------------------------------------------------------
 void ILI9341_FillRectangle (uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color)
 {
-    // clipping
+    // Ausschnitt
     if ((x >= ILI9341_WIDTH) || (y >= ILI9341_HEIGHT))
 	{
 		return;
@@ -364,7 +369,7 @@ void ILI9341_FillRectangle (uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint
     HAL_GPIO_WritePin(ILI9341_DC_GPIO_Port, ILI9341_DC_Pin, GPIO_PIN_SET);
     for (y = h; y > 0; y--)
 	{
-        for(x = w; x > 0; x--)
+        for (x = w; x > 0; x--)
 		{
             HAL_SPI_Transmit(&ILI9341_SPI_PORT, data, sizeof(data), HAL_MAX_DELAY);
         }
